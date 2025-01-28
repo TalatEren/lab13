@@ -34,10 +34,33 @@ public class UserService {
             throw new RuntimeException("Invalid password");
         }
         
+        if (!user.isActive()) {
+            throw new RuntimeException("User is not active");
+        }
+        
         return user;
     }
 
     public List<User> findAll() {
         return userRepository.findAll();
+    }
+
+    public User activateUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setActive(true);
+        return userRepository.save(user);
+    }
+
+    public User deactivateUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setActive(false);
+        return userRepository.save(user);
+    }
+
+    public User getCurrentUser() {
+        // To be implemented with SecurityContextHolder
+        return null;
     }
 }
