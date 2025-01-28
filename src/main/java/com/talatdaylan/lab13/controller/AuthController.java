@@ -1,5 +1,7 @@
 package com.talatdaylan.lab13.controller;
 
+import com.talatdaylan.lab13.dto.AuthRequest;
+import com.talatdaylan.lab13.dto.AuthResponse;
 import com.talatdaylan.lab13.model.User;
 import com.talatdaylan.lab13.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -16,30 +18,30 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
-        return ResponseEntity.ok(userService.createUser(user));
+    public ResponseEntity<AuthResponse> register(@RequestBody User user) {
+        User createdUser = userService.createUser(user);
+        return ResponseEntity.ok(convertToAuthResponse(createdUser));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
         User user = userService.authenticate(request.getEmail(), request.getPassword());
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(convertToAuthResponse(user));
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<?> getProfile() {
-        // To be implemented with security context
-        return ResponseEntity.ok().build();
+    public ResponseEntity<AuthResponse> getProfile() {
+        User currentUser = userService.getCurrentUser();
+        return ResponseEntity.ok(convertToAuthResponse(currentUser));
     }
-}
 
-class LoginRequest {
-    private String email;
-    private String password;
-
-    // Getters and setters
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    private AuthResponse convertToAuthResponse(User user) {
+        return new AuthResponse(
+            user.getId(),
+            user.getUsername(),
+            user.getEmail(),
+            user.getRole(),
+            user.isActive()
+        );
+    }
 }
